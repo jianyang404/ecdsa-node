@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import server from "./server";
 
 function Transfer({ address, setBalance }) {
@@ -8,6 +8,8 @@ function Transfer({ address, setBalance }) {
   const setValue = (setter) => (evt) => setter(evt.target.value);
 
   async function transfer(evt) {
+    // TODO: send a signed message to the server
+
     evt.preventDefault();
 
     try {
