@@ -13,11 +13,16 @@ function App() {
       <Wallet
         balance={balance}
         setBalance={setBalance}
+        publicKey={publicKey}
         privateKey={privateKey}
         setPrivateKey={setPrivateKey}
         setPublicKey={setPublicKey}
       />
-      <Transfer setBalance={setBalance} publicKey={publicKey} />
+      <Transfer
+        setBalance={setBalance}
+        publicKey={publicKey}
+        privateKey={privateKey}
+      />
     </div>
   );
 }

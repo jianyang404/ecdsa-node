@@ -1,30 +1,30 @@
 import React from "react";
 import server from "./server";
-import { secp256k1 } from "ethereum-cryptography/secp256k1";
-import { toHex } from "ethereum-cryptography/utils";
 
 function Wallet({
+  publicKey,
   privateKey,
   setPrivateKey,
   setPublicKey,
   balance,
   setBalance,
 }) {
-  async function onChange(evt) {
-    const privateKey = evt.target.value;
-    setPrivateKey(privateKey);
+  async function handleChange(evt) {
+    setPublicKey(evt.target.value);
 
-    const publicKey = toHex(secp256k1.getPublicKey(privateKey));
-    setPublicKey(publicKey);
-
-    if (publicKey) {
+    if (evt.target.value) {
       const {
         data: { balance },
-      } = await server.get(`balance/0x${publicKey}`);
+      } = await server.get(`balance/${evt.target.value}`);
       setBalance(balance);
     } else {
       setBalance(0);
     }
+  }
+
+  async function onChange(evt) {
+    const privateKey = evt.target.value;
+    setPrivateKey(privateKey);
   }
 
   return (
@@ -32,7 +32,16 @@ function Wallet({
       <h1>Your Wallet</h1>
 
       <label>
-        Wallet Address
+        Public Key
+        <input
+          placeholder="Enter your public key"
+          value={publicKey}
+          onChange={handleChange}
+        ></input>
+      </label>
+
+      <label>
+        Private Key
         <input
           placeholder="Enter your private key"
           value={privateKey}

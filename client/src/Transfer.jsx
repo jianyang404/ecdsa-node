@@ -1,28 +1,42 @@
 import React, { useState } from "react";
 import server from "./server";
+import { keccak256 } from "ethereum-cryptography/keccak";
+import { utf8ToBytes, toHex } from "ethereum-cryptography/utils";
+import { secp256k1 } from "ethereum-cryptography/secp256k1";
 
-function Transfer({ address, setBalance }) {
+function Transfer({ publicKey, privateKey, setBalance }) {
   const [sendAmount, setSendAmount] = useState("");
   const [recipient, setRecipient] = useState("");
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
 
   async function transfer(evt) {
-    // TODO: send a signed message to the server
-
     evt.preventDefault();
 
     try {
-      const {
-        data: { balance },
-      } = await server.post(`send`, {
-        sender: address,
+      const derivedKey = toHex(secp256k1.getPublicKey(privateKey));
+
+      if (publicKey !== derivedKey)
+        return alert("Invalid public/private key pair");
+
+      const payload = {
+        sender: publicKey,
         amount: parseInt(sendAmount),
         recipient,
-      });
+        timestamp: Date.now(),
+      };
+
+      const messageHash = toHex(
+        keccak256(utf8ToBytes(JSON.stringify(payload)))
+      );
+      const signature = secp256k1.sign(messageHash, privateKey).toCompactHex();
+
+      const {
+        data: { balance },
+      } = await server.post(`send`, { ...payload, messageHash, signature });
       setBalance(balance);
     } catch (ex) {
-      alert(ex.response.data.message);
+      alert(ex?.response?.data?.message ?? ex);
     }
   }
 
