@@ -1,6 +1,6 @@
 {
   "env": {
-    "browser": true,
+    "node": true,
     "commonjs": true,
     "es2021": true
   },
@@ -8,5 +8,5 @@
   "parserOptions": {
     "ecmaVersion": "latest"
   },
-  "rules": { "react/prop-types": 0 }
+  "rules": {}
 }

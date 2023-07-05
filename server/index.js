@@ -2,14 +2,20 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const port = 3042;
+const { secp256k1 } = require("ethereum-cryptography/secp256k1");
+require("dotenv").config();
 
 app.use(cors());
 app.use(express.json());
 
+const PUBLIC_ONE = process.env.PUBLIC_ONE || "one";
+const PUBLIC_TWO = process.env.PUBLIC_TWO || "two";
+const PUBLIC_THREE = process.env.PUBLIC_THREE || "three";
+
 const balances = {
-  "0x03bff667c37a8b58284da29c6c0a8d48a60750d0da30b1ab451c470fab46662ea4": 100,
-  "0x0364f9e8fef23df8194a680e3a70144da1f4a32da0f293348caea8eeca80bc61c8": 50,
-  "0x02b19317c3e991dea49990b6f69564174fd3ae2fc718d0e0c5e4b0ef5e000a1a7c": 75,
+  [PUBLIC_ONE]: 100,
+  [PUBLIC_TWO]: 50,
+  [PUBLIC_THREE]: 75,
 };
 
 app.get("/balance/:address", (req, res) => {
@@ -19,9 +25,10 @@ app.get("/balance/:address", (req, res) => {
 });
 
 app.post("/send", (req, res) => {
-  // TODO: verify the signed message with the public key
+  const { sender, recipient, amount, signature, messageHash } = req.body;
+  const isSigned = secp256k1.verify(signature, messageHash, sender);
 
-  const { sender, recipient, amount } = req.body;
+  if (!isSigned) throw new Error("Unauthorized transaction");
 
   setInitialBalance(sender);
   setInitialBalance(recipient);
